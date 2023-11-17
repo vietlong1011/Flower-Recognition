@@ -19,13 +19,14 @@ public class IrisClassifierCSV {
         try {
             // Load dataset from TXT
             CSVLoader loader = new CSVLoader();
+          //  loader.setSource(new File("C:/Flower Recognition/Flower Recognition java/src/main/java/org/example/dataset.txt"));
             loader.setSource(new File("src/main/java/org/example/dataset.txt"));
             Instances data = loader.getDataSet();
             if (data.classIndex() == -1) {
                 data.setClassIndex(data.numAttributes() - 1);
             }
             Classifier network  = new MultilayerPerceptron();
-
+            System.out.println("Network : " + network);
 
             /** hard code **/
             // Build classifier

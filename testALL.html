@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <title>Bài 14</title>
+  </head>
+  <body>
+    <script src="https://www.lactame.com/lib/ml/3.2.0/ml.min.js"></script>
+    <script>
+      //Dữ liệu đào tạo
+      X = new ML.Matrix([
+        [1, 5.1, 3.5, 1.4, 0.2], [1, 4.9, 3, 1.4, 0.2], [1, 4.7, 3.2, 1.3, 0.2], [1, 4.6, 3.1, 1.5, 0.2], [1, 5, 3.6, 1.4, 0.2],
+        [1, 5.4, 3.9, 1.7, 0.4], [1, 4.6, 3.4, 1.4, 0.3], [1, 5, 3.4, 1.5, 0.2], [1, 4.4, 2.9, 1.4, 0.2], [1, 4.9, 3.1, 1.5, 0.1],
+        [1, 7, 3.2, 4.7, 1.4], [1, 6.4, 3.2, 4.5, 1.5], [1, 6.9, 3.1, 4.9, 1.5], [1, 5.5, 2.3, 4, 1.3], [1, 6.5, 2.8, 4.6, 1.5],
+        [1, 5.7, 2.8, 4.5, 1.3], [1, 6.3, 3.3, 4.7, 1.6], [1, 4.9, 2.4, 3.3, 1], [1, 6.6, 2.9, 4.6, 1.3], [1, 5.2, 2.7, 3.9, 1.4],
+        [1, 6.3, 3.3, 6, 2.5], [1, 5.8, 2.7, 5.1, 1.9], [1, 7.1, 3, 5.9, 2.1], [1, 6.3, 2.9, 5.6, 1.8], [1, 6.5, 3, 5.8, 2.2],
+        [1, 7.6, 3, 6.6, 2.1], [1, 4.9, 2.5, 4.5, 1.7], [1, 7.3, 2.9, 6.3, 1.8], [1, 6.7, 2.5, 5.8, 1.8], [1, 7.2, 3.6, 6.1, 2.5]
+      ]);
+      y = new ML.Matrix([
+        [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
+        [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
+        [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]
+      ]);
+
+      //Bước 1
+      W1 = new ML.Matrix([ //Ma trận hệ số của lớp input
+        [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
+        [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
+        [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
+        [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]
+      ]).mul(2).sub(ML.Matrix.ones(4, 5));
+      W2 = new ML.Matrix([ //Ma trận hệ số của lớp ẩn
+        [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
+        [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
+        [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]
+      ]).mul(2).sub(ML.Matrix.ones(3, 5));
+      alpha = 0.03;
+
+      //Bước 2 & 3
+      while (true) {
+        PD1 = new ML.Matrix([ //Ma trận đạo hàm riêng với các hệ số lớp input
+          [0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0]
+        ]);
+        PD2 = new ML.Matrix([ //Ma trận đạo hàm riêng với các hệ số lớp ẩn
+          [0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0]
+        ]);
+
+        for (i = 0; i < 30; i++) {
+          a2 = W1.mmul(X.getRowVector(i).transpose()).apply(function (row, col) {
+            this.set(row, col, 1 / (1 + Math.exp(-this.get(row, col))))
+          }).addRow(0, [1]);
+          a3 = W2.mmul(a2).apply(function (row, col) {
+            this.set(row, col, 1 / (1 + Math.exp(-this.get(row, col))))
+          });
+
+          delta3 = ML.Matrix.sub(a3, y.getRowVector(i).transpose());
+          delta2 = a2.clone().mulColumnVector(ML.Matrix.ones(5, 1).sub(a2)).removeRow(0).mulColumnVector(W2.transpose().removeRow(0).mmul(delta3));
+
+          Delta1 = delta2.mmul(X.getRowVector(i));
+          Delta2 = delta3.mmul(a2.transpose());
+
+          PD1.add(Delta1);
+          PD2.add(Delta2);
+        }
+
+        PD1.div(30);
+        PD2.div(30);
+
+        //Cập nhật các hệ số
+        W1.sub(ML.Matrix.mul(PD1, alpha));
+        W2.sub(ML.Matrix.mul(PD2, alpha));
+
+        //Kiếm tra điều kiện dừng
+        if (PD1.norm() + PD2.norm() < 0.03)
+          break;
+      }
+
+      //Ứng dụng
+      X_test = [
+        ML.Matrix.columnVector([1, 5, 3.3, 1.4, 0.2]),
+        ML.Matrix.columnVector([1, 5.7, 2.8, 4.1, 1.3]),
+        ML.Matrix.columnVector([1, 5.9, 3, 5.1, 1.8])
+      ];
+      y_hat_test = X_test.map(function (x) {
+        a2 = W1.mmul(x).apply(function (row, col) {
+          this.set(row, col, 1 / (1 + Math.exp(-this.get(row, col))))
+        }).addRow(0, [1]);
+        a3 = W2.mmul(a2).apply(function (row, col) {
+          this.set(row, col, 1 / (1 + Math.exp(-this.get(row, col))))
+        });
+        return a3.maxColumnIndex(0);
+      });
+      document.write("Bông hoa có độ dài đài hoa " + X_test[0].get(1, 0) + " cm, độ rộng đài hoa " + X_test[0].get(2, 0) + " cm, độ dài cánh hoa " + X_test[0].get(3, 0) + " cm, độ rộng cánh hoa " + X_test[0].get(4, 0) + " cm là " + (y_hat_test[0][0] == 2 ? "Iris virginica" : y_hat_test[0][0] == 1 ? "Iris versicolor" : "Iris setosa") + ".<br>");
+      document.write("Bông hoa có độ dài đài hoa " + X_test[1].get(1, 0) + " cm, độ rộng đài hoa " + X_test[1].get(2, 0) + " cm, độ dài cánh hoa " + X_test[1].get(3, 0) + " cm, độ rộng cánh hoa " + X_test[1].get(4, 0) + " cm là " + (y_hat_test[1][0] == 2 ? "Iris virginica" : y_hat_test[1][0] == 1 ? "Iris versicolor" : "Iris setosa") + ".<br>");
+      document.write("Bông hoa có độ dài đài hoa " + X_test[2].get(1, 0) + " cm, độ rộng đài hoa " + X_test[2].get(2, 0) + " cm, độ dài cánh hoa " + X_test[2].get(3, 0) + " cm, độ rộng cánh hoa " + X_test[2].get(4, 0) + " cm là " + (y_hat_test[2][0] == 2 ? "Iris virginica" : y_hat_test[2][0] == 1 ? "Iris versicolor" : "Iris setosa") + ".<br>");    
+    </script>
+  </body>
+</html>

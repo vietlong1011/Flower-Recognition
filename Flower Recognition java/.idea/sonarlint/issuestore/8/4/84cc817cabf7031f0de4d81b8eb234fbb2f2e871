@@ -1,0 +1,13 @@
+
+^
+java:S1075"ARefactor your code to get this URI from a customizable parameter.(®›û”8‡∆·áº1
+X	java:S125 "<This block of commented-out lines of code should be removed.(ã…ˇº8Ò∆·áº1
+]	java:S125."<This block of commented-out lines of code should be removed.(ïàåÅ˚ˇˇˇˇ8Ú∆·áº1
+G	java:S1067"+Replace this use of System.out by a logger.(›πâ‡8¯∆·áº1
+G	java:S1069"+Replace this use of System.out by a logger.(–‹Ÿô8˚∆·áº1
+L
+java:S1128"/Remove this unused import 'weka.core.Instance'.(é™ËÃ8ˇ∆·áº1
+Z
+java:S1128	"8Remove this unused import 'weka.classifiers.Evaluation'.(ÿ»ùû˛ˇˇˇˇ8Ä«·áº1
+P
+java:S1128".Remove this unused import 'java.util.Scanner'.(“‹≈∏˙ˇˇˇˇ8Ä«·áº1
